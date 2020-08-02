@@ -7,7 +7,7 @@ import multer from 'multer'
 import md5 from 'md5'
 import dotenv from 'dotenv'
 
-import db from './db'
+import db from './db.js'
 
 dotenv.config()
 
@@ -54,4 +54,34 @@ app.use(session({
 
 app.listen(process.env.PORT, () => {
   console.log('已經啟動了哦')
+})
+
+app.post('/users', async (req, res) => {
+  if (!req.headers['content-type'].includes('application/json')) {
+    res.status(400)
+    res.send({ success: false, message: '格式不符，應是json' })
+    return
+  }
+
+  try {
+    await db.users.create({
+      name: req.body.name,
+      account: req.body.account,
+      password: md5(req.body.password)
+    })
+    res.status(200)
+    res.send({ success: true, message: req.body.name + '註冊成功' })
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      // 資料格式錯誤 (使用者傳送的)
+      const key = Object.keys(error.errors)[0]
+      const message = error.errors[key].message
+      res.status(400)
+      res.send({ success: false, message })
+    } else {
+      // 伺服器錯誤 (開發者的程式碼有錯誤)
+      res.status(500)
+      res.send({ success: false, message: '伺服器錯誤' })
+    }
+  }
 })

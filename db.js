@@ -9,10 +9,16 @@ mongoose.connect(process.env.DBURL)
 mongoose.plugin(beautifyUnique)
 
 const userSchema = new Schema({
+  name:{
+    type:String,
+    minlength: [1, '名稱必須1個字以上'],
+    maxlength: [30, '名稱必須少於30個字'],
+    required: [true, '請輸入名稱']
+  },
   account: {
     type: String,
     minlength: [4, '帳號必須4個字以上'],
-    maxlength: [15, '帳號必須少於20個字'],
+    maxlength: [15, '帳號必須少於15個字'],
     unique: '帳號已使用',
     required: [true, '請輸入帳號']
   },

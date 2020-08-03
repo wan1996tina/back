@@ -85,3 +85,41 @@ app.post('/users', async (req, res) => {
     }
   }
 })
+
+app.post('/login', async (req, res) => {
+  if (!req.headers['content-type'].includes('application/json')) {
+    res.status(400)
+    res.send({ success: false, message: '格式不符，應是json' })
+    return
+  }
+
+  try {
+    const result = await db.users.find(
+      {
+        account: req.body.account,
+        password: md5(req.body.password)
+      }
+    )
+
+    if (result.length > 0) {
+      req.session.user = result[0].account
+      res.status(200)
+      res.send({ success: true, message: result[0].name })
+    } else {
+      res.status(404)
+      res.send({ success: false, message: '帳號密碼錯誤' })
+    }
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      // 資料格式錯誤
+      const key = Object.keys(error.errors)[0]
+      const message = error.errors[key].message
+      res.status(400)
+      res.send({ success: false, message })
+    } else {
+      // 伺服器錯誤
+      res.status(500)
+      res.send({ success: false, message: '伺服器錯誤' })
+    }
+  }
+})

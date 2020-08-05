@@ -3,7 +3,7 @@ import bodyParser from 'body-parser'
 import cors from 'cors'
 import connectMongo from 'connect-mongo'
 import session from 'express-session'
-import multer from 'multer'
+// import multer from 'multer'
 import md5 from 'md5'
 import dotenv from 'dotenv'
 
@@ -118,6 +118,46 @@ app.post('/login', async (req, res) => {
       res.send({ success: false, message })
     } else {
       // 伺服器錯誤
+      res.status(500)
+      res.send({ success: false, message: '伺服器錯誤' })
+    }
+  }
+})
+
+// 查詢使用者常用計時器
+app.get('/get_timer/:account', async (req, res) => {
+  try {
+    const result = await db.users.find({ account: req.params.account })
+    console.log(result)
+    res.status(200)
+    res.send({ success: true, message: '', result })
+  } catch (error) {
+    res.status(500)
+    res.send({ success: false, message: '伺服器錯誤' })
+  }
+})
+
+// 新增常用計時器
+app.patch('/save_timer/:account', async (req, res) => {
+  if (!req.headers['content-type'].includes('application/json')) {
+    res.status(400)
+    res.send({ success: false, message: '格式不符，應是json' })
+    return
+  }
+
+  try {
+    const result = await db.users.findOne({ account: req.params.account }, req.body, { new: true })
+    res.status(200)
+    res.send({ success: true, message: '', result })
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      // 資料格式錯誤 (使用者傳送的)
+      const key = Object.keys(error.errors)[0]
+      const message = error.errors[key].message
+      res.status(400)
+      res.send({ success: false, message })
+    } else {
+      // 伺服器錯誤 (開發者的程式碼有錯誤)
       res.status(500)
       res.send({ success: false, message: '伺服器錯誤' })
     }

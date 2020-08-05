@@ -25,6 +25,9 @@ const userSchema = new Schema({
   password: {
     type: String,
     required: [true, '請輸入密碼']
+  },
+  timerList: {
+    type: Array
   }
 }, {
   versionKey: false

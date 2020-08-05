@@ -128,7 +128,7 @@ app.post('/login', async (req, res) => {
 app.get('/get_timer/:account', async (req, res) => {
   try {
     const result = await db.users.find({ account: req.params.account })
-    console.log(result)
+    // console.log(result)
     res.status(200)
     res.send({ success: true, message: '', result })
   } catch (error) {
@@ -144,7 +144,7 @@ app.patch('/save_timer/:account', async (req, res) => {
     res.send({ success: false, message: '格式不符，應是json' })
     return
   }
-
+  console.log(req.body)
   try {
     const result = await db.users.findOne({ account: req.params.account }, req.body, { new: true })
     res.status(200)
